@@ -38,6 +38,7 @@ A2ZApp/
 │   ├── http.js                      # URL/query 组装、请求去重、uni.request
 │   ├── request.js                   # 鉴权头、刷新、401 处理、业务响应解包
 │   ├── session.js                   # 登录/刷新/退出、token 存取、密码加密
+│   ├── preflight.js                 # 16 项共享模板、旧草稿合并、提交数据构建
 │   ├── navigation.js                # 导航并发控制、重试、短时导航保护
 │   ├── i18n.js                      # 语言读写、翻译查找、lang:changed 事件
 │   ├── lang/{en,zh}.json            # 中英文文案
@@ -53,7 +54,7 @@ A2ZApp/
 │   ├── index/index.vue              # 首页：新建检查、查看历史
 │   ├── preflightSelectDrone/
 │   │   └── preflightSelectDrone.vue # 无人机解析、搜索、选择与确认
-│   ├── check/check.vue              # 17 项检查、照片、草稿、提交、离开拦截
+│   ├── check/check.vue              # 16 项检查、照片、草稿、提交、离开拦截
 │   ├── preflightHistory/
 │   │   └── preflightHistory.vue     # 服务端分页历史、本地草稿、ID 筛选
 │   ├── preflightHistoryDetail/
@@ -68,7 +69,8 @@ A2ZApp/
 ├── unpackage/
 │   ├── cache/                       # 编译缓存、运行资源等生成内容
 │   └── release/apk/                 # 按环境命名的 Android 安装包
-└── doc/                             # 本次新增的项目分析文档
+├── tests/preflight.test.mjs          # 检查项调整与兼容回归测试
+└── doc/                             # 项目分析文档
 ```
 
 ## 3. 分层与依赖
@@ -83,6 +85,7 @@ flowchart TB
     Pages --> Nav["导航层：navigation.js"]
     Pages --> Lang["语言层：i18n.js"]
     Pages --> Upload["check.vue：照片上传与压缩"]
+    Pages --> Template["preflight.js：共享检查模板、旧数据恢复、提交构建"]
     Req --> Session
     Req --> Http["传输层：http.js"]
     Session --> Http
@@ -113,9 +116,10 @@ flowchart TB
 | `http.js` | `httpRequest` | 拼接服务地址和排序 query，按 method + URL + data 合并进行中请求 |
 | `navigation.js` | `safeSwitchTab`、`safeNavigateTo`、`safeReLaunch` | 防重复导航、锁冲突重试；部分导航设置 450 ms 保护窗口 |
 | `i18n.js` | `getLang`、`setLang`、`t`、`onLangChange` | 语言持久化、事件广播、平铺 key 或嵌套路径翻译 |
+| `preflight.js` | `createPreflightSteps`、`restorePreflightDraft`、`buildPreflightItems` | 统一填写/历史顺序，合并旧电机/桨叶数据，构建 16 项提交 |
 | `check.vue` | `markStep`、`saveDraft`、`uploadOne`、`doSubmitPreflight` | 检查状态、原生返回拦截、照片压缩上传、本地草稿与最终提交 |
 
-核心业务集中在 `check.vue`：同一文件同时包含页面展示、检查模板、草稿读写、上传鉴权和图片压缩。后续扩展检查类型时，这一集中结构是主要维护成本来源。
+检查模板和数据映射已提取到 `common/preflight.js`。其余核心业务仍集中在 `check.vue`，包括页面展示、草稿读写、上传鉴权和图片压缩；后续扩展检查类型时，这一集中结构仍是主要维护成本来源。
 
 ## 5. 启动、认证与页面生命周期
 

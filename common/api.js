@@ -1,6 +1,6 @@
 // export const DEFAULT_API_BASE_URL = 'http://192.168.231.1'
 //开发服
-// export const DEFAULT_API_BASE_URL = 'https://test.a2zd.co'
+export const DEFAULT_API_BASE_URL = 'https://test.a2zd.co'
 //预发布
 // export const DEFAULT_API_BASE_URL = "https://pre.a2zd.co"
 //巴厘岛
@@ -12,7 +12,7 @@
 //哈萨克斯坦正式服
 // export const DEFAULT_API_BASE_URL = "https://gcs.a2zd.kz"
 //国内正式服
-export const DEFAULT_API_BASE_URL = "https://gcs.a2zd.co"
+// export const DEFAULT_API_BASE_URL = "https://gcs.a2zd.co"
 
 function isH5Runtime() {
   if (typeof window === 'undefined' || !window.location) return false

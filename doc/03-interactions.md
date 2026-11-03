@@ -11,7 +11,7 @@
 | 历史 Tab（标题为“检查”） | `PAGES.check` / `PAGES.preflightHistory` | 新建检查、草稿继续/删除、ID 筛选、历史详情、分页刷新 |
 | 设置 Tab | `PAGES.settings` | 用户资料、头像预览、退出确认 |
 | 无人机选择 | `PAGES.preflightSelectDrone` | 搜索、点击选择、底部确认；长按选择后弹出开始确认 |
-| 检查填写 | `PAGES.preflightCheck` | 17 项结果/备注/照片、步骤切换、汇总、保存草稿、提交、切换无人机 |
+| 检查填写 | `PAGES.preflightCheck` | 16 项结果/备注/照片、步骤切换、汇总、保存草稿、提交、切换无人机 |
 | 历史详情 | `PAGES.preflightHistoryDetail` | 结果、逐项备注、图片预览、删除确认 |
 
 `HeaderBar` 负责事件发出，由页面决定动作。通知是占位交互：设置页点击后显示“建设中”提示，首页隐藏通知；没有发现通知列表或未读数服务。Tab 切换由 `pages.json` 的原生 TabBar 提供。
@@ -263,6 +263,7 @@ sequenceDiagram
     U->>C: 逐项选择结果并查看汇总
     U->>C: 点击提交并确认
     C->>C: 检查完成度、无人机、提交锁与指纹
+    C->>C: 构建16项，电机与桨叶使用motorPropellerOk
     C->>R: createCheck(scope, drone_id, items, summary_note)
     R->>B: POST /dev-api/preflight/checks
     alt 提交成功
@@ -308,7 +309,7 @@ sequenceDiagram
     D->>R: GET checks/:id
     R->>B: 查询详情
     B-->>D: 记录与items
-    D->>D: 建立结果/备注映射，汇总照片URL
+    D->>D: 合并电机与桨叶结果/备注，汇总并去重照片URL
     opt 点击照片
         D-->>U: uni.previewImage
     end

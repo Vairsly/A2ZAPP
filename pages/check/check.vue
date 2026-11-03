@@ -170,6 +170,7 @@ import { clearSession, getAccessToken, hasRefreshToken, refreshTokens, ensureFre
 import { API, getApiBaseUrl } from '@/common/api'
 import { request, requestGet, requestPost } from '@/common/request'
 import { isNavGuardActive, safeNavigateTo, safeReLaunch, safeSwitchTab } from '@/common/navigation'
+import { PREFLIGHT_STEP_METAS, createPreflightSteps, restorePreflightDraft, buildPreflightItems } from '@/common/preflight'
 
 function svgDataUri(svg) {
   const encoded = encodeURIComponent(String(svg || '').trim())
@@ -348,25 +349,8 @@ export default {
         qualitySteps: [80, 70, 60, 50, 45, 40],
         maxAttempts: 6,
       },
-      stepMetas: [
-        { key: 'airframeOk', labelKey: 'label.preflight.item.airframe' },
-        { key: 'contactsOk', labelKey: 'label.preflight.item.contacts' },
-        { key: 'motorOk', labelKey: 'label.preflight.item.motor' },
-        { key: 'propellerOk', labelKey: 'label.preflight.item.propeller' },
-        { key: 'upperCoverOk', labelKey: 'label.preflight.item.upperCover' },
-        { key: 'antennaOk', labelKey: 'label.preflight.item.antenna' },
-        { key: 'landingCameraOk', labelKey: 'label.preflight.item.landingCamera' },
-        { key: 'aerialCameraOk', labelKey: 'label.preflight.item.aerialCamera' },
-        { key: 'lidarOk', labelKey: 'label.preflight.item.lidar' },
-        { key: 'parachuteOk', labelKey: 'label.preflight.item.parachute' },
-        { key: 'winchOk', labelKey: 'label.preflight.item.winch' },
-        { key: 'batteryOk', labelKey: 'label.preflight.item.battery' },
-        { key: 'routerOk', labelKey: 'label.preflight.item.router' },
-        { key: 'remoteServerOk', labelKey: 'label.preflight.item.remoteServer' },
-        { key: 'dockOk', labelKey: 'label.preflight.item.dockPosition' },
-        { key: 'rtkOk', labelKey: 'label.preflight.item.rtk' },
-        { key: 'remoteServerM2MOk', labelKey: 'label.preflight.item.remoteServerM2M' },
-      ],
+      // 填写页、汇总和历史详情共用同一份检查项顺序及中英文文案键。
+      stepMetas: PREFLIGHT_STEP_METAS,
 
       mockUpload: false,
       maxPhotosPerItem: PREFLIGHT_MAX_PHOTOS_PER_ITEM,
@@ -381,161 +365,7 @@ export default {
       draft: {
         note: '',
       },
-      steps: [
-        {
-          key: 'airframeOk',
-          labelKey: 'label.preflight.item.airframe',
-          descKey: 'label.preflight.itemDesc.airframe',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'contactsOk',
-          labelKey: 'label.preflight.item.contacts',
-          descKey: 'label.preflight.itemDesc.contacts',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'motorOk',
-          labelKey: 'label.preflight.item.motor',
-          descKey: 'label.preflight.itemDesc.motor',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'propellerOk',
-          labelKey: 'label.preflight.item.propeller',
-          descKey: 'label.preflight.itemDesc.propeller',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'upperCoverOk',
-          labelKey: 'label.preflight.item.upperCover',
-          descKey: 'label.preflight.itemDesc.upperCover',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'antennaOk',
-          labelKey: 'label.preflight.item.antenna',
-          descKey: 'label.preflight.itemDesc.antenna',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'landingCameraOk',
-          labelKey: 'label.preflight.item.landingCamera',
-          descKey: 'label.preflight.itemDesc.landingCamera',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'aerialCameraOk',
-          labelKey: 'label.preflight.item.aerialCamera',
-          descKey: 'label.preflight.itemDesc.aerialCamera',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'lidarOk',
-          labelKey: 'label.preflight.item.lidar',
-          descKey: 'label.preflight.itemDesc.lidar',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'parachuteOk',
-          labelKey: 'label.preflight.item.parachute',
-          descKey: 'label.preflight.itemDesc.parachute',
-          photoRequired: false,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'winchOk',
-          labelKey: 'label.preflight.item.winch',
-          descKey: 'label.preflight.itemDesc.winch',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'batteryOk',
-          labelKey: 'label.preflight.item.battery',
-          descKey: 'label.preflight.itemDesc.battery',
-          photoRequired: true,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'routerOk',
-          labelKey: 'label.preflight.item.router',
-          descKey: 'label.preflight.itemDesc.router',
-          photoRequired: false,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'remoteServerOk',
-          labelKey: 'label.preflight.item.remoteServer',
-          descKey: 'label.preflight.itemDesc.remoteServer',
-          photoRequired: false,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'dockOk',
-          labelKey: 'label.preflight.item.dockPosition',
-          descKey: 'label.preflight.itemDesc.dockPosition',
-          photoRequired: false,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'rtkOk',
-          labelKey: 'label.preflight.item.rtk',
-          descKey: 'label.preflight.itemDesc.rtk',
-          photoRequired: false,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-        {
-          key: 'remoteServerM2MOk',
-          labelKey: 'label.preflight.item.remoteServerM2M',
-          descKey: 'label.preflight.itemDesc.remoteServerM2M',
-          photoRequired: false,
-          ok: null,
-          photoUrls: [],
-          note: '',
-        },
-      ],
+      steps: createPreflightSteps(),
       currentStepIndex: 0,
       flowView: 'steps',
       reviewFromSummary: false,
@@ -787,6 +617,8 @@ export default {
         landingCameraOk: true,
         lidarOk: true,
       }
+      // 合并项沿用已有桨叶示例图，避免请求不存在的合并项图片。
+      if (k === 'motorPropellerOk') return '/static/check/propellerOk.png'
       if (pngKeys[k]) return `/static/check/${k}.png`
 
       const map = {
@@ -828,7 +660,8 @@ export default {
     },
     buildDraftPayload() {
       return {
-        v: 1,
+        // 版本 2 保存合并后的 16 项；恢复逻辑仍识别旧版 17 项草稿。
+        v: 2,
         droneId: String(this.selectedDroneId || ''),
         droneAlias: String(this.selectedDroneAlias || ''),
         currentStepIndex: Number(this.currentStepIndex) || 0,
@@ -900,30 +733,13 @@ export default {
       const map = this.getDraftsMap()
       const payload = map && Object.prototype.hasOwnProperty.call(map, id) ? map[id] : null
       if (!payload || !payload.steps) return false
-      const savedSteps = Array.isArray(payload.steps) ? payload.steps : []
-      const byKey = new Map()
-      for (const s of savedSteps) {
-        const k = String((s && s.key) || '').trim()
-        if (!k) continue
-        byKey.set(k, s)
-      }
-      this.steps = this.steps.map((s) => {
-        const k = String((s && s.key) || '').trim()
-        const saved = byKey.get(k)
-        if (!saved) return { ...s }
-        return {
-          ...s,
-          ok: saved.ok === true || saved.ok === false ? Boolean(saved.ok) : null,
-          note: String(saved.note || ''),
-          photoUrls: Array.isArray(saved.photoUrls) ? saved.photoUrls.filter(Boolean).slice(0, PREFLIGHT_MAX_PHOTOS_PER_ITEM) : [],
-        }
-      })
-      const idx = Number(payload.currentStepIndex) || 0
-      this.currentStepIndex = Math.min(Math.max(idx, 0), this.steps.length - 1)
-      const fv = String(payload.flowView || 'steps')
-      this.flowView = fv === 'summary' ? 'summary' : 'steps'
+      // 合并旧电机/桨叶的结果、备注与照片，并按原步骤 key 恢复检查位置。
+      const restored = restorePreflightDraft(payload)
+      this.steps = restored.steps
+      this.currentStepIndex = restored.currentStepIndex
+      this.flowView = restored.flowView
       this.reviewFromSummary = false
-      this.draft = { note: String((payload.draft && payload.draft.note) || '') }
+      this.draft = restored.draft
       return true
     },
     markStep(ok) {
@@ -1261,12 +1077,8 @@ export default {
         scope: 'ground_daily',
         drone_id: this.selectedDroneId || '',
         summary_note: this.draft.note || '',
-        items: this.steps.map((s) => ({
-          item_key: s.key,
-          ok: Boolean(s.ok),
-          note: s.note || '',
-          photo_urls: (s.photoUrls || []).filter(Boolean),
-        })),
+        // 直接提交新的 16 项结构，电机和桨叶共用 motorPropellerOk 字段。
+        items: buildPreflightItems(this.steps),
       }
 
       const fingerprint = JSON.stringify(payload)
@@ -1306,7 +1118,8 @@ export default {
           const photoMatch = String(message || '').match(/photo\s+required\s+for\s+([A-Za-z0-9_]+)/i)
           if (photoMatch && photoMatch[1]) {
             const key = String(photoMatch[1] || '').trim()
-            const meta = this.steps.find((s) => s.key === key) || this.stepMetas.find((s) => s.key === key)
+            // 兼容后端返回旧字段名的错误，将提示统一映射到合并后的检查项。
+            const meta = this.stepMetas.find((s) => s.key === key || s.legacyKeys.includes(key))
             const label = meta && meta.labelKey ? this.tt(meta.labelKey) : key
             message = `${label}：${this.tt('message.preflight.photoRequired')}`
           } else if (/photo\s+required/i.test(String(message || ''))) {

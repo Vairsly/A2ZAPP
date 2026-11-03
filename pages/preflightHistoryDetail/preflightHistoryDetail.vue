@@ -73,6 +73,7 @@ import { getAccessToken } from '@/common/session'
 import { API, getApiBaseUrl } from '@/common/api'
 import { request, requestGet } from '@/common/request'
 import { safeReLaunch, safeSwitchTab } from '@/common/navigation'
+import { PREFLIGHT_STEP_METAS, restorePreflightSteps } from '@/common/preflight'
 
 export default {
   data() {
@@ -84,25 +85,8 @@ export default {
       id: '',
       loading: false,
       detail: null,
-      stepMetas: [
-        { key: 'airframeOk', labelKey: 'label.preflight.item.airframe' },
-        { key: 'contactsOk', labelKey: 'label.preflight.item.contacts' },
-        { key: 'motorOk', labelKey: 'label.preflight.item.motor' },
-        { key: 'propellerOk', labelKey: 'label.preflight.item.propeller' },
-        { key: 'upperCoverOk', labelKey: 'label.preflight.item.upperCover' },
-        { key: 'antennaOk', labelKey: 'label.preflight.item.antenna' },
-        { key: 'landingCameraOk', labelKey: 'label.preflight.item.landingCamera' },
-        { key: 'aerialCameraOk', labelKey: 'label.preflight.item.aerialCamera' },
-        { key: 'lidarOk', labelKey: 'label.preflight.item.lidar' },
-        { key: 'parachuteOk', labelKey: 'label.preflight.item.parachute' },
-        { key: 'winchOk', labelKey: 'label.preflight.item.winch' },
-        { key: 'batteryOk', labelKey: 'label.preflight.item.battery' },
-        { key: 'routerOk', labelKey: 'label.preflight.item.router' },
-        { key: 'remoteServerOk', labelKey: 'label.preflight.item.remoteServer' },
-        { key: 'dockOk', labelKey: 'label.preflight.item.dockPosition' },
-        { key: 'rtkOk', labelKey: 'label.preflight.item.rtk' },
-        { key: 'remoteServerM2MOk', labelKey: 'label.preflight.item.remoteServerM2M' },
-      ],
+      // 与填写页保持相同的 16 项展示顺序，电池检查位于绞盘之前。
+      stepMetas: PREFLIGHT_STEP_METAS,
     }
   },
   onLoad(options) {
@@ -174,13 +158,17 @@ export default {
         const items = {}
         const itemNotes = {}
         const allPhotos = []
-        for (const it of itemsArr) {
+        // 读取旧记录时合并电机/桨叶结果及备注，新旧接口数据均按当前模板显示。
+        for (const it of restorePreflightSteps(itemsArr)) {
           if (!it) continue
-          const key = String(it.item_key || it.key || '').trim()
+          const key = it.key
           if (!key) continue
           items[key] = Boolean(it.ok)
           const note = String(it.note || '').trim()
           if (note) itemNotes[key] = note
+        }
+        for (const it of itemsArr) {
+          if (!it) continue
           const photos = Array.isArray(it.photo_urls) ? it.photo_urls : []
           for (const p of photos) {
             const u = this.resolveUploadedUrl(p)
@@ -196,7 +184,8 @@ export default {
           note: String(data.summary_note || '').trim(),
           items,
           itemNotes,
-          photoUrls: allPhotos,
+          // 旧电机、桨叶字段可能引用同一张照片，预览列表按完整 URL 去重。
+          photoUrls: [...new Set(allPhotos)],
         }
       } catch {
         this.detail = null

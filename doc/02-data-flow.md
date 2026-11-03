@@ -31,7 +31,7 @@ flowchart TB
     Profile --> Cache[("userInfo 缓存")]
     Cache -->|"rtsp_streams 字符串"| Drones["3 解析、去重、搜索无人机"]
     Drones -->|"ID / alias / 进入模式"| Selection[("选择信息与 preflightStartNew")]
-    Selection --> Check["4 检查页：17 项状态与备注"]
+    Selection --> Check["4 检查页：16 项状态与备注"]
     Drafts[("preflightDrafts：按 droneId 索引")]
     Check -->|"自动 / 手动保存快照"| Drafts
     Drafts -->|"历史页选择草稿，按 key 恢复"| Check
@@ -100,31 +100,30 @@ flowchart TD
 
 ## 5. 检查模板与校验
 
-模板写在 `check.vue` 的 `steps` 内，当前范围固定为 `ground_daily`。详情页另有相同 key 顺序的 `stepMetas`，并非动态读取模板接口。
+App 模板统一定义在 `common/preflight.js`，填写页和详情页共用 16 项顺序，当前范围固定为 `ground_daily`，并非动态读取模板接口。A2ZDispatch 后端和 Web 模板已同步：电机和桨叶/机体共用 `motorPropellerOk` 一个结果、备注和照片组，新提交与存储均为 16 项。后端仍接收旧 `motorOk/propellerOk` 两字段并在校验后合并，详见[前后端同步](./05-preflight-backend-sync.md)。
 
 | 顺序 | item_key / key | 检查项 | 照片必需 |
 | --- | --- | --- | --- |
 | 1 | `airframeOk` | 机身、机臂与起落架 | 是 |
 | 2 | `contactsOk` | 机臂充电触点 | 是 |
-| 3 | `motorOk` | 电机 | 是 |
-| 4 | `propellerOk` | 桨叶/机体完好 | 是 |
-| 5 | `upperCoverOk` | 上盖 | 是 |
-| 6 | `antennaOk` | 4G、数传天线 | 是 |
-| 7 | `landingCameraOk` | 精准降落相机 | 是 |
-| 8 | `aerialCameraOk` | 航拍相机 | 是 |
-| 9 | `lidarOk` | 激光雷达 | 是 |
-| 10 | `parachuteOk` | 降落伞救援系统 | 否 |
+| 3 | `motorPropellerOk` | 电机/桨叶/机体完好 | 是 |
+| 4 | `upperCoverOk` | 上盖 | 是 |
+| 5 | `antennaOk` | 4G、数传天线 | 是 |
+| 6 | `landingCameraOk` | 精准降落相机 | 是 |
+| 7 | `aerialCameraOk` | 航拍相机 | 是 |
+| 8 | `lidarOk` | 激光雷达 | 是 |
+| 9 | `parachuteOk` | 降落伞救援系统 | 否 |
+| 10 | `batteryOk` | 电量/电池状态正常 | 是 |
 | 11 | `winchOk` | 绞盘绳索与挂钩 | 是 |
-| 12 | `batteryOk` | 电量/电池状态正常 | 是 |
-| 13 | `routerOk` | 4G/5G 路由器 | 否 |
-| 14 | `remoteServerOk` | 远程穿透服务器 | 否 |
-| 15 | `dockOk` | 自动停机坪位置 | 否 |
-| 16 | `rtkOk` | RTK 基站 | 否 |
-| 17 | `remoteServerM2MOk` | 远程穿透服务器（仅 M2M 路由器） | 否 |
+| 12 | `routerOk` | 4G/5G 路由器 | 否 |
+| 13 | `remoteServerOk` | 远程穿透服务器 | 否 |
+| 14 | `dockOk` | 自动停机坪位置 | 否 |
+| 15 | `rtkOk` | RTK 基站 | 否 |
+| 16 | `remoteServerM2MOk` | 远程穿透服务器（仅 M2M 路由器） | 否 |
 
 单项 `ok` 初始为 `null`，选择结果后是 `true/false`。`flowCompleted` 只表示每项均已选择结果，允许含不通过项；不等同于全部通过。页面中的总结果展示读取后端 `passed`，当前前端不提交总 `passed` 字段，也不能确认后端总结果计算规则。
 
-11 项要求照片，每项最多 10 张。标记结果、下一项和进入汇总时有照片检查；最终提交方法没有再次统一检查所有必拍项，具体风险见[核查建议](./04-findings.md)。
+10 个显示项要求照片，每项新拍照片最多 10 张，后端对新格式每项也限制 10 张。旧草稿原电机/桨叶照片合并时保留全部唯一 URL，即使合计超过 10 张也不截断；达到上限时禁止新增，按新格式提交前需精简至 10 张。旧版 17 项请求仍按原两项各 10 张校验后合并。标记结果、下一项和进入汇总时有照片检查；最终提交方法没有再次统一检查所有必拍项，具体风险见[核查建议](./04-findings.md)。
 
 ## 6. 照片数据流
 
@@ -175,7 +174,7 @@ flowchart LR
 ```javascript
 // uni storage: preflightDrafts[droneId]
 {
-  v: 1,
+  v: 2,
   droneId: 'drone-id',
   droneAlias: 'drone-alias',
   currentStepIndex: 0,
@@ -186,7 +185,7 @@ flowchart LR
 }
 ```
 
-每个无人机 ID 只保留一个快照；没有账号或环境命名空间。保存入口包括手动、每 3 秒内容变化检测、`onHide` 和离开确认。自动保存指纹不含 `ts`，避免未变更内容持续写盘；恢复时按 key 匹配当前模板、保留当前模板元数据，并把照片数截到 10 张。
+每个无人机 ID 只保留一个快照；没有账号或环境命名空间。保存入口包括手动、每 3 秒内容变化检测、`onHide` 和离开确认。自动保存指纹不含 `ts`，避免未变更内容持续写盘。新快照版本为 2；恢复兼容旧 17 项快照，合并电机/桨叶结果、去重保留备注和照片，并按原步骤 key 恢复位置，避免合并及电池/绞盘调序后错位。旧两项均为通过才合并为通过，任一不通过则为不通过，否则保留未完成。
 
 ### 7.3 提交请求
 
@@ -199,7 +198,7 @@ flowchart LR
 }
 ```
 
-`labelKey/descKey/photoRequired` 不随记录提交。提交前把 `ok` 转成布尔值；提交成功清除当前无人机草稿，并切回历史 Tab。防重复依赖当前页面提交锁和 JSON 指纹，未见向后端传递幂等键。
+`labelKey/descKey/photoRequired` 不随记录提交。`buildPreflightItems()` 为 16 个显示项各构建一条记录，使用 `motorPropellerOk` 合并字段；提交前把 `ok` 转成布尔值。提交成功清除当前无人机草稿，并切回历史 Tab。防重复依赖当前页面提交锁和 JSON 指纹，未见向后端传递幂等键。
 
 ### 7.4 历史和详情转换
 
@@ -211,8 +210,8 @@ flowchart LR
 | `drone_id` | `droneId` |
 | `photo_count` | `photoCount`，当前历史模板未显示此值 |
 | `summary_note` | 详情 `note` |
-| `items[].item_key` 或 `key` | 详情按 key 建立 `items` 和 `itemNotes` 映射 |
-| `items[].photo_urls` | 补全 URL 后汇总为详情照片列表，当前不按检查项分组展示 |
+| `items[].item_key` 或 `key` | 先按共享模板合并旧电机/桨叶项，再按 key 建立结果与备注映射 |
+| `items[].photo_urls` | 补全 URL、去重后汇总为详情照片列表，当前不按检查项分组展示 |
 
 ## 8. 接口清单
 
