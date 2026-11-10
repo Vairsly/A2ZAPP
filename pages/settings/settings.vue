@@ -28,6 +28,13 @@
         </view>
       </view>
 
+      <view class="card">
+        <view class="row">
+          <text class="label">{{ tt('label.settings.version') }}</text>
+          <text class="value">{{ appLabel }}</text>
+        </view>
+      </view>
+
       <button class="btn" type="warn" @click="confirmLogout">
         {{ tt('label.pub.btn.logout') }}
       </button>
@@ -40,7 +47,7 @@ import HeaderBar from '@/components/HeaderBar.vue'
 import { getLang, onLangChange } from '@/common/i18n'
 import { PAGES, STORAGE_KEYS } from '@/common/constants'
 import { logout, getAccessToken, decodeJwtPayload } from '@/common/session'
-import { API } from '@/common/api'
+import { API, APP_LABEL } from '@/common/api'
 import { requestGet } from '@/common/request'
 import { safeReLaunch, safeSwitchTab } from '@/common/navigation'
 
@@ -48,6 +55,7 @@ export default {
   components: { HeaderBar },
   data() {
     return {
+      appLabel: APP_LABEL,
       lang: getLang(),
       unreadCount: 0,
       avatarUrl: '',

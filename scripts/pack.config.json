@@ -1,0 +1,22 @@
+{
+  "cliPath": "",
+  "android": {
+    "packagename": "uni.app.UNI134ED0E",
+    "androidpacktype": "3",
+    "certalias": "",
+    "certfile": "",
+    "certpassword": "",
+    "storepassword": "",
+    "channels": ""
+  },
+  "envDirs": {
+    "local": "本地",
+    "test": "测试服",
+    "pre": "预发布",
+    "bali": "巴厘岛",
+    "usTrial": "美国体验服",
+    "us": "美国正式服",
+    "kz": "哈萨克斯坦",
+    "cn": "正式服"
+  }
+}

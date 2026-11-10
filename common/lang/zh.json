@@ -33,6 +33,7 @@
   "label.user.email": "邮箱",
   "label.user.id": "用户ID",
   "label.settings.language": "语言",
+  "label.settings.version": "版本",
 
   "label.preflight.title": "飞前检查",
   "label.preflight.item.battery": "电量/电池状态正常",

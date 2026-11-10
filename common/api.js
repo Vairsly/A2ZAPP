@@ -1,18 +1,24 @@
-// export const DEFAULT_API_BASE_URL = 'http://192.168.231.1'
-//开发服
-export const DEFAULT_API_BASE_URL = 'https://test.a2zd.co'
-//预发布
-// export const DEFAULT_API_BASE_URL = "https://pre.a2zd.co"
-//巴厘岛
-// export const DEFAULT_API_BASE_URL = 'https://a2zgcs.id'
-//美国体验服
-// export const DEFAULT_API_BASE_URL = "https://a2zd.us"
-//美国正式服
-// export const DEFAULT_API_BASE_URL = "https://gcs.a2zd.us"
-//哈萨克斯坦正式服
-// export const DEFAULT_API_BASE_URL = "https://gcs.a2zd.kz"
-//国内正式服
-// export const DEFAULT_API_BASE_URL = "https://gcs.a2zd.co"
+import manifest from '../manifest.json'
+import buildConfig from '../build.config.json'
+
+// 各环境 API 地址；切换环境改根目录 build.config.json 的 env
+const API_ENVS = {
+  local: { url: 'http://192.168.231.1', name: 'Local' },
+  test: { url: 'https://test.a2zd.co', name: 'test-a2zd-co' }, // 开发服
+  pre: { url: 'https://pre.a2zd.co', name: 'pre-a2zd-co' }, // 预发布
+  bali: { url: 'https://a2zgcs.id', name: 'a2zgcs-id' }, // 巴厘岛
+  usTrial: { url: 'https://a2zd.us', name: 'a2zd-us' }, // 美国体验服
+  us: { url: 'https://gcs.a2zd.us', name: 'gcs-a2zd-us' }, // 美国正式服
+  kz: { url: 'https://gcs.a2zd.kz', name: 'gcs-a2zd-kz' }, // 哈萨克斯坦正式服
+  cn: { url: 'https://gcs.a2zd.co', name: 'gcs-a2zd-co' }, // 国内正式服
+}
+const ENV = buildConfig.env
+if (!API_ENVS[ENV]) throw new Error(`build.config.json 的 env "${ENV}" 不在 API_ENVS 中`)
+
+export const DEFAULT_API_BASE_URL = API_ENVS[ENV].url
+
+// 应用内显示的名字+版本号，如 A2Z-pre-a2zd-co v1.0.0；版本号取自 manifest.json
+export const APP_LABEL = `A2Z-${API_ENVS[ENV].name} v${manifest.versionName}`
 
 function isH5Runtime() {
   if (typeof window === 'undefined' || !window.location) return false

@@ -136,7 +136,7 @@ flowchart TB
 
 | 配置 | 当前值 / 行为 |
 | --- | --- |
-| 客户端默认服务地址 | `common/api.js`：`https://gcs.a2zd.co` |
+| 客户端默认服务地址 | `common/api.js`：`API_ENVS[env].url`，env 取根目录 `build.config.json` |
 | H5 本地代理条件 | localhost / 127.0.0.1 / 0.0.0.0，或端口 5173 / 8080；匹配时 API base 返回空字符串 |
 | Vite 默认代理目标 | `http://172.24.26.170:5001`；可由 `VITE_API_TARGET` 覆盖 |
 | Vite 监听地址 | `HOST` → `VITE_HOST` → `127.0.0.1` |
@@ -147,7 +147,7 @@ flowchart TB
 
 生产 App 的请求会组合默认服务地址与 `/dev-api/...`。本地 H5 请求由 Vite 代理转发；若使用默认目标，后端收到的是移除 `/dev-api` 的路径。生产 H5 只有满足代码中的运行环境判断才走同源路径，其他情况下仍使用默认服务地址。
 
-`STORAGE_KEYS.apiBaseUrl` 只是已定义的键，`getApiBaseUrl()` 没有读取该键，设置本地同名值不会切换环境。源码中注释保留了多套环境地址，APK 目录也按环境区分，但这些产物命名不能证明当前源码对应某个安装包内容。
+`STORAGE_KEYS.apiBaseUrl` 只是已定义的键，`getApiBaseUrl()` 没有读取该键，设置本地同名值不会切换环境。源码中 `API_ENVS` 表保留了多套环境地址，环境与版本集中在根目录 `build.config.json`（`common/api.js` 运行时读取 env，`scripts/pack-apk.mjs` 打包时把版本同步进 `manifest.json`）；`APP_LABEL`（如 `A2Z-gcs-a2zd-co v1.0.1`）由环境名与 `manifest.json` 的 `versionName` 组成，在设置页显示。APK 目录也按环境区分，但这些产物命名不能证明当前源码对应某个安装包内容。
 
 代理支持 `/socket.io` 不代表已实现实时通信；当前页面及公共业务模块未发现 Socket.IO/WebSocket 客户端接入。
 
@@ -161,6 +161,6 @@ flowchart TB
 | 生命周期认证 | [App.vue](../App.vue)，29、38 |
 | 页面/Tab 注册 | [pages.json](../pages.json)，2、59 |
 | 路由常量 | [common/constants.js](../common/constants.js)，67 |
-| 默认地址与 H5 代理判断 | [common/api.js](../common/api.js)，16、32、57 |
+| 默认地址与 H5 代理判断 | [common/api.js](../common/api.js)，18、35、55 |
 | 代理配置 | [vite.config.js](../vite.config.js)，1、50 |
 | 检查页生命周期 | [pages/check/check.vue](../pages/check/check.vue)，546、594 |
